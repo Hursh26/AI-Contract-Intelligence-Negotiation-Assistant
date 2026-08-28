@@ -1,0 +1,61 @@
+# ===== Secrets & environment =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+
+# ===== OS files =====
+.DS_Store
+Thumbs.db
+
+# ===== IDE / editor =====
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Node / JS / TS =====
+node_modules/
+dist/
+build/
+.next/
+out/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-store/
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.mypy_cache/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# ===== ML / Data =====
+*.pkl
+*.h5
+*.pt
+*.ckpt
+/data/raw/
+/data/processed/
+/models/checkpoints/
+*.log
+
+# ===== Contract data (sensitive — never commit real contract files) =====
+/contracts_sample/*
+!/contracts_sample/.gitkeep
+*.docx
+*.pdf
+!docs/**/*.pdf
+
+# ===== Build artifacts =====
+*.zip
+*.tar.gz
+coverage/

@@ -1,0 +1,34 @@
+name: CI
+
+# Runs on every PR into develop or main, and on pushes to those branches.
+# This is a placeholder — fill in real build/lint/test steps once the
+# tech stack (frontend/backend/ml) is finalized. Keeping this workflow
+# green is what "required status checks" in branch protection checks against.
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+jobs:
+  placeholder-checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Placeholder lint step
+        run: echo "Add lint command here once stack is decided (e.g., eslint, flake8)"
+
+      - name: Placeholder test step
+        run: echo "Add test command here once stack is decided (e.g., pytest, jest)"
+
+      - name: Placeholder build step
+        run: echo "Add build command here once stack is decided"
+
+# TODO once stack is finalized:
+# - Add setup-node / setup-python steps
+# - Install dependencies (npm ci / pip install -r requirements.txt)
+# - Replace placeholder steps with real lint/test/build commands
+# - Consider matrix builds for frontend + backend + ml separately

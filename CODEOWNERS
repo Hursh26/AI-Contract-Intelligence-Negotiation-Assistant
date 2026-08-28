@@ -1,0 +1,11 @@
+# CODEOWNERS
+# Automatically requests reviews from the right people/team when a PR
+# touches a given path. Update usernames/team handles as the team is finalized.
+
+/frontend/   @frontend-team
+/backend/    @backend-team
+/ml/         @ml-team
+/docs/       @your-github-username
+/.github/    @your-github-username
+CONTRIBUTING.md   @your-github-username
+README.md         @your-github-username
