@@ -1,0 +1,18 @@
+# Normalize line endings to LF in the repo regardless of the OS a
+# contributor commits from (Mac/Linux default to LF, Windows Git often
+# defaults to converting to CRLF on checkout) — avoids noisy whole-file
+# diffs and accidental CRLF creeping into source files across the team.
+* text=auto eol=lf
+
+# Windows batch scripts, if any get added, should keep CRLF (required by cmd.exe).
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files — never touch line endings, never diff as text.
+*.pdf binary
+*.docx binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.pkl binary
+*.h5 binary

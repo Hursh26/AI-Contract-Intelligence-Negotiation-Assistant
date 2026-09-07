@@ -1,9 +1,6 @@
 name: CI
 
 # Runs on every PR into develop or main, and on pushes to those branches.
-# This is a placeholder — fill in real build/lint/test steps once the
-# tech stack (frontend/backend/ml) is finalized. Keeping this workflow
-# green is what "required status checks" in branch protection checks against.
 
 on:
   pull_request:
@@ -12,23 +9,35 @@ on:
     branches: [develop, main]
 
 jobs:
-  placeholder-checks:
-    runs-on: ubuntu-latest
+  backend-tests:
+    name: Backend tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        # Cross-platform proof: the same test suite runs on all three OSes
+        # the team actually develops on (Mac + Windows) plus the OS
+        # production most likely deploys to (Linux). Tests use an isolated
+        # SQLite DB + temp storage dir (see backend/tests/conftest.py), so
+        # no external services are needed on any runner.
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Placeholder lint step
-        run: echo "Add lint command here once stack is decided (e.g., eslint, flake8)"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
 
-      - name: Placeholder test step
-        run: echo "Add test command here once stack is decided (e.g., pytest, jest)"
+      - name: Install backend dependencies
+        working-directory: backend
+        run: pip install -r requirements-dev.txt
 
-      - name: Placeholder build step
-        run: echo "Add build command here once stack is decided"
+      - name: Run backend tests
+        working-directory: backend
+        run: pytest -v
 
-# TODO once stack is finalized:
-# - Add setup-node / setup-python steps
-# - Install dependencies (npm ci / pip install -r requirements.txt)
-# - Replace placeholder steps with real lint/test/build commands
-# - Consider matrix builds for frontend + backend + ml separately
+# TODO once frontend/ml stacks are finalized:
+# - Add a frontend job (npm ci / lint / test) once frontend/ has code
+# - Add an ml job (pytest / notebook checks) once ml/ has code
