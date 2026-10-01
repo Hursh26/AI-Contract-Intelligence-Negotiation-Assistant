@@ -1,0 +1,10 @@
+# ML/NLP service dependencies
+numpy>=1.26,<3
+nltk>=3.9,<4
+spacy>=3.8,<4
+sentence-transformers>=3.3,<6
+faiss-cpu>=1.9,<2
+transformers>=4.47,<6
+torch>=2.5,<3
+fastapi>=0.115,<1
+uvicorn[standard]>=0.32,<1
