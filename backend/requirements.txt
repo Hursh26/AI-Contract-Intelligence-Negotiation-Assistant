@@ -13,3 +13,6 @@ python-dotenv==1.0.1
 # no clause identification (that stays NLP/ML's "Identify basic clauses" task).
 pymupdf==1.28.2
 python-docx==1.2.0
+
+# HTTP client for calling the ML/NLP service (POST /contracts/{id}/analyze).
+httpx==0.28.1

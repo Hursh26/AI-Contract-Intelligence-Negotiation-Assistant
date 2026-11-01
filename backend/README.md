@@ -61,6 +61,10 @@ tests/                      # Backend unit tests (pytest)
 | POST | `/api/v1/contracts/upload` | Create upload API / Validate uploaded file | Accepts `multipart/form-data`, field `file`. PDF/DOCX/TXT only, ≤10MB (`MAX_UPLOAD_SIZE_MB`), rejects empty files and content that doesn't match its extension |
 | GET | `/api/v1/contracts/{id}` | — | Read back a stored contract, incl. extraction results once processed |
 | POST | `/api/v1/contracts/{id}/extract` | Store extracted information (raw text) | Pulls raw text straight out of the stored file ourselves (PyMuPDF for PDF, python-docx for DOCX, plain decode for TXT) and persists it. **No clause identification** — that's still NLP/ML's "Identify basic clauses" task. This exists so the pipeline works end-to-end without waiting on their pipeline; 422 if the file can't be parsed |
+| POST | `/api/v1/contracts/{id}/analyze` | Backend ↔ ML integration | Extracts text if not already stored, calls the ML service's `POST /analyze` (`ML_SERVICE_URL`, default `http://localhost:8001`; start it with `uvicorn ml.api:app --port 8001`), stores `extracted_text` + `clauses`, marks `processed`. 404 unknown id, 422 unparseable file, 502 ML service down/bad response (details logged, not returned), 503 ML busy |
+| GET | `/api/v1/contracts` | Frontend history | Analyzed contracts, newest first: `{id, filename, uploaded_at, risk_summary}`. Query: `limit` (1-200, default 100), `offset` |
+| GET | `/api/v1/contracts/{id}/analysis` | Frontend results page | `{id, filename, uploaded_at, num_pages, clauses[{category, text, risk_label HIGH/MEDIUM/LOW, risk_score 0-100, reasons, page}], risk_summary{overall_score, level, high, medium, low}, entities{parties, rent, deposit, money_mentions, dates, notice_periods}}`. 409 if not analyzed yet. `page`/`num_pages` are null (ML doesn't report pages). Overall score = 0.5·worst clause + 0.5·average |
+| POST | `/api/v1/contracts/{id}/ask` | Ask-your-contract chat | Body `{"question": str}` → `{answer, evidence[{text, page, similarity 0-100}]}`, answered by ML `/ask`. ML keeps a single in-memory index (last analyzed contract), so the backend re-analyzes the right contract first when needed (`app/utils/ml_client.py`). 409 if not analyzed, 502 if ML is down, 503 if the ML slot is busy (retry). Question max 1000 chars |
 | PATCH | `/api/v1/contracts/{id}/extraction` | Store extracted information (clauses) | Body: `{"extracted_text": str, "clauses": ...}` — for the NLP/ML pipeline to submit identified clauses (and optionally override the raw text) once it exists; marks it `processed` |
 
 No auth yet (JWT task not scoped). `contracts.owner_id` is nullable until that lands.
@@ -104,3 +108,12 @@ The team develops on a mix of Mac and Windows machines, so this was audited and 
 3. **CI matrix (`.github/workflows/ci.yml`) — the actual Mac/Windows/Linux proof:** `backend-tests` runs the identical `pytest` suite on `ubuntu-latest`, `windows-latest`, and `macos-latest` GitHub-hosted runners on every push/PR to `develop`/`main`. This is real execution on real Windows and Linux machines, not a claim — check the **Actions** tab on the PR for this scaffold once it's pushed; each OS shows its own pass/fail.
 
 **What's *not* independently verified:** nobody on the team has yet run this by hand on an actual Windows machine outside of CI — worth a quick manual smoke test from Saurabh (or anyone on Windows) once this is pushed, on top of the CI matrix.
+
+
+## ML service integration notes
+
+- The ML service keeps **one** in-memory search index (the last contract analyzed). The backend serializes analyze/ask calls (`ML_LOCK_TIMEOUT_SECONDS`, default 60s, then 503) and tracks which contract the index holds in process memory.
+- That tracking is only correct with a **single backend worker**. If you run more than one worker/instance, set `ML_REINDEX_EVERY_ASK=true` (every `/ask` re-analyzes first; slower but always the right contract). The proper fix is for ML to accept a contract id on `/analyze` and `/ask`.
+- Contract `status`: `uploaded` → `extracted` (text only, via `/extract`) → `processed` (clauses stored, via `/analyze` or `PATCH .../extraction`). `PATCH .../extraction` requires `clauses` to be a JSON list.
+- `tests/fixtures/ml_analyze_sample.json` is a real captured ML `/analyze` response; a test pins our handling of it, so an ML format change fails CI. Re-capture it if the ML output format intentionally changes.
+- Uploaded files live in `backend/storage/` (gitignored — never commit contracts).

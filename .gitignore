@@ -49,6 +49,8 @@ env/
 *.log
 
 # ===== Contract data (sensitive — never commit real contract files) =====
+# Uploaded contracts stored by the backend (any extension, incl. .txt)
+/backend/storage/
 /contracts_sample/*
 !/contracts_sample/.gitkeep
 *.docx
