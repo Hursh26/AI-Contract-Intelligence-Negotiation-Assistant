@@ -17,7 +17,7 @@ class ContractExtractionUpdate(BaseModel):
     once they've extracted text and identified clauses for a contract."""
 
     extracted_text: str
-    clauses: Any | None = None
+    clauses: list[Any] | None = None  # list of clause objects (see ml /analyze)
 
 
 class ContractOut(BaseModel):

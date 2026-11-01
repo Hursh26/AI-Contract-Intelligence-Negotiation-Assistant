@@ -11,9 +11,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and ver
 - **Text Extraction API**: Raw text extraction endpoint (`POST /api/v1/contracts/{id}/extract`) for PDF (PyMuPDF), DOCX (python-docx), and TXT (`@virajm7`).
 - **NLP/ML Contract Integration**: Clause & extraction persistence endpoint (`PATCH /api/v1/contracts/{id}/extraction`) (`@virajm7`).
 - **CI/CD Pipeline**: Multi-platform automated backend tests on Ubuntu, Windows, and macOS GitHub Actions runners (`@virajm7`, `@hursh26`).
+- **Backend ↔ ML integration**: `POST /api/v1/contracts/{id}/analyze` extracts text, calls the ML service (`/analyze`) and stores clauses; `ML_SERVICE_URL` setting (`@virajm7`).
+- **Frontend-facing API**: `GET /api/v1/contracts` (history, paginated), `GET /api/v1/contracts/{id}/analysis` (clauses, risk summary, entities) and `POST /api/v1/contracts/{id}/ask` (RAG Q&A via ML `/ask`) (`@virajm7`).
 - **Repository Governance**: Automated reviewer assignment via `CODEOWNERS` and team workflow guide `team-github-workflow-guide.md` (`@hursh26`, `@komal1304`).
 
 ### Changed
+- `POST /contracts/{id}/extract` now sets status `extracted` (text only); `processed` means clauses are stored. `PATCH .../extraction` now requires `clauses` to be a JSON list (`@virajm7`).
+- Backend CORS defaults now allow the Vite dev server (`localhost:5173`); `httpx` moved to runtime dependencies; `backend/storage/` is gitignored (`@virajm7`).
 - Updated `CODEOWNERS` backend reviewer mapping to `@hursh26` following team roster update (`@hursh26`).
 
 ---

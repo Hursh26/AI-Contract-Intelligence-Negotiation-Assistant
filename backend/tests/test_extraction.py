@@ -35,7 +35,7 @@ def test_extract_pdf_text(client: TestClient) -> None:
     response = client.post(f"/api/v1/contracts/{contract_id}/extract")
     assert response.status_code == 200
     body = response.json()
-    assert body["status"] == "processed"
+    assert body["status"] == "extracted"
     assert "Employment Agreement" in body["extracted_text"]
     assert body["clauses"] is None  # extraction never touches clauses — that's NLP/ML's job
 
