@@ -12,6 +12,17 @@ npm run build      # typecheck + production build
 ```
 
 Start the backend first (see `../backend/README.md`). Override the proxy target with `VITE_BACKEND_URL`.
+For a production build served from another origin, set `VITE_API_URL` (see `.env.example`) and allow that origin in the backend CORS list.
+
+## Pages
+
+| Route | What it does |
+|---|---|
+| `/` | Upload (drag and drop, file picker, or the sample contract), recent contracts |
+| `/c/:id/reading` | Loading screen: extract the text, then run the analysis |
+| `/c/:id` | Overview: summary, risk score, key facts, clauses to look at first |
+| `/c/:id/review` | Contract text, clause list with risk filter, explanation, "Ask this contract" |
+| `/c/:id/negotiate` | Accept or drop suggested changes, email draft, marked-up copy download |
 
 ## What is real and what is demo
 
@@ -21,6 +32,33 @@ Start the backend first (see `../backend/README.md`). Override the proxy target 
 | Clauses, risk levels, risk score, key facts | Real: `POST /analyze` then `GET /analysis` (backend `develop` + ML service) |
 | Ask answers | Real: `POST /ask` |
 | Plain-language explanations and suggested wording | **Built-in examples** (keyword rules in `src/lib/analysis.ts`); the ML service does not produce these |
-| Recent contracts | Browser `localStorage`, last 10, removable. Not `GET /contracts`: it lists everyone's contracts and there is no login yet |
+| Recent contracts | Browser `localStorage` only (see below) |
 
 If the analysis endpoints are missing (older backend) or the ML service is down, the app keeps working with the built-in preview analysis and the page banner says so.
+
+## Recent contracts
+
+- Kept in this browser only. `GET /contracts` is deliberately **not** used: it lists everyone's contracts and there is no login yet.
+- One row per document: uploading the same file name again replaces its earlier entry (case-insensitive).
+- Keeps the last 10 (`MAX_RECENT` in `src/lib/recent.ts`); older ones drop off.
+- Each row has an × to remove it, and "Clear all" asks for a second click. This only clears the list on this device: the backend has no delete endpoint, so uploaded files stay on the server.
+
+## Where things are
+
+```
+src/
+├── lib/api.ts          # backend calls and plain-language error messages
+├── lib/analysis.ts     # turns backend analysis into what the pages show (and the built-in fallback)
+├── lib/recent.ts       # recent contracts (localStorage)
+├── lib/sample.ts       # synthetic sample contract for the "try a sample" button
+├── components/ui.tsx   # cursor, magnetic buttons, reveal animations, risk tags
+├── pages/              # Home, Reading, ContractLayout, Overview, Review, Negotiate
+└── index.css           # design tokens and motion styles
+```
+
+## Testing notes
+
+- No automated tests yet, and CI has no frontend job. Check `npm run build` passes and click through the flow above.
+- Layout was checked from 320px to 1920px wide. Not yet checked on real phones, with keyboard-only navigation, or in Safari and Firefox.
+- The real ML service has not been tested with this UI; only a stand-in that follows the backend's `ml_client.py` contract.
+- Use only synthetic contracts for testing (see `CONTRIBUTING.md`).
