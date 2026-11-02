@@ -21,13 +21,24 @@ export class ApiError extends Error {
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api/v1'
 
+// Shown to users. In development builds only, a short hint is added for the team (stripped from production).
+const CANNOT_CONNECT =
+  'We cannot connect right now. Please check your internet connection and try again in a moment.' +
+  (import.meta.env.DEV ? ' (Dev hint: start the backend on port 8000.)' : '')
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let res: Response
   try {
     res = await fetch(BASE + path, init)
   } catch {
     console.warn(`Fineprint: could not reach the API at ${BASE}. Is the backend running?`)
-    throw new ApiError(0, 'We cannot connect right now. Please check your internet connection and try again in a moment.')
+    throw new ApiError(0, CANNOT_CONNECT)
+  }
+  // When the backend itself is down, the dev server / gateway answers 502, 503 or 504. Only the analysis
+  // calls use those codes for "the analysis tool is unavailable", so everywhere else treat it as "cannot connect".
+  if ([502, 503, 504].includes(res.status) && !/\/(analyze|ask)$/.test(path)) {
+    console.warn(`Fineprint: the API at ${BASE} answered ${res.status}. Is the backend running on port 8000?`)
+    throw new ApiError(0, CANNOT_CONNECT)
   }
   if (!res.ok) {
     let detail = res.statusText

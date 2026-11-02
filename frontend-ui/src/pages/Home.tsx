@@ -123,12 +123,13 @@ export default function Home() {
               <p className="mono mt-3 opacity-70">PDF, Word or text file · up to {MAX_MB} MB</p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-x-8 gap-y-5">
                 <Magnetic>
-                  <button className="btn" disabled={busy} onClick={() => input.current?.click()}>
+                  <button className="btn" data-cursor="" disabled={busy} onClick={() => input.current?.click()}>
                     <Roll>Choose a file</Roll><span aria-hidden>↑</span>
                   </button>
                 </Magnetic>
                 <button
                   disabled={busy}
+                  data-cursor=""
                   onClick={() => void send(new File([SAMPLE_TEXT], SAMPLE_NAME, { type: 'text/plain' }))}
                   className="mono min-h-11 border-b-2 border-current bg-transparent px-0 text-current hover:text-lime"
                   style={{ color: drag ? '#0f110e' : undefined }}
