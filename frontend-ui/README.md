@@ -6,7 +6,7 @@ React 19 + Vite + TypeScript + Tailwind v4. Talks to the FastAPI backend in `../
 
 ## Quick start
 
-You need Git, Python 3.11+ and Node.js 20.19+. Use **two terminal windows**, both starting in the project's root folder. The backend must be running before you use the UI.
+You need Git, **Python 3.11 or 3.12** and Node.js 20.19+. Do not use Python 3.14 (or any Python much newer than 3.12): the backend's pinned packages have no ready-made installs for it and `pip install` fails. Use **two terminal windows**, both starting in the project's root folder. The backend must be running before you use the UI.
 
 ### Window 1: backend (port 8000)
 
@@ -55,6 +55,7 @@ Only needed for the real analysis. Without it the app still works and shows an e
 | What you see | Cause and fix |
 |---|---|
 | "We cannot connect right now…" (in dev it adds a hint about port 8000) | The backend is not running. Start Window 1 and check the health link above. |
+| `pip install` ends with `Failed building wheel for pydantic-core` | Your Python is too new (e.g. 3.14). Install Python 3.12, delete the `backend\.venv` folder, then recreate it with `py -3.12 -m venv .venv` and run the install again. |
 | Backend window says `No module named 'fastapi'` (or another package) | The packages were never installed. Run the `pip install -r requirements-dev.txt` line from the first-time step. |
 | Backend window says it cannot connect to PostgreSQL | `DATABASE_URL` is not set in that window. Set it again (it does not carry over between windows). |
 | "address already in use" for port 8000 or 3000 | An old server is still running. Stop it with Ctrl+C, or find it with `netstat -ano \| findstr :8000` and end it with `taskkill /PID <number> /F`. |
